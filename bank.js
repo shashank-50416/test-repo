@@ -23,7 +23,7 @@ function details2(){
        
     }
     else{
-        alert("na account dobhudham annukunnava dash na kodaka")
+        alert("sorry")
     }
 }
 function details3(){
