@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Banking App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .messages {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9f5e9;
+            border: 1px solid #c3e6c3;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginPage">
+        <h1>Banking App</h1>
+        <div class="form-group">
+            <label for="username">Account Number:</label>
+            <input type="text" id="username" placeholder="Enter Account Number">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter Password">
+        </div>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div class="container hidden" id="homePage">
+        <h1>Welcome to Your Bank</h1>
+        <button onclick="authenticate('accountDetails')">Account Details</button>
+        <button onclick="authenticate('debitPage')">Debit</button>
+        <button onclick="authenticate('creditPage')">Credit</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container hidden" id="passwordPrompt">
+        <h2>Password Required</h2>
+        <div class="form-group">
+            <label for="sectionPassword">Enter Password:</label>
+            <input type="password" id="sectionPassword" placeholder="Enter Password">
+        </div>
+        <button onclick="verifyPassword()">Submit</button>
+        <div class="messages hidden" id="passwordMessage"></div>
+    </div>
+
+    <div class="container hidden" id="accountDetails">
+        <h2>Account Details</h2>
+        <p><strong>Account Holder:</strong> John Doe</p>
+        <p><strong>Account Number:</strong> 1234567890</p>
+        <p><strong>Balance:</strong> ₹<span id="balance">5000</span></p>
+        <button onclick="redirectHome()">Back to Home</button>
+    </div>
+
+    <div class="container hidden" id="debitPage">
+        <h2>Debit Amount</h2>
+        <div class="form-group">
+            <label for="debitAmount">Enter Amount:</label>
+            <input type="number" id="debitAmount" placeholder="Enter amount">
+        </div>
+        <button onclick="debitAmount()">Submit</button>
+        <div class="messages hidden" id="debitMessage"></div>
+        <button onclick="redirectHome()">Back to Home</button>
+    </div>
+
+    <div class="container hidden" id="creditPage">
+        <h2>Credit Amount</h2>
+        <div class="form-group">
+            <label for="creditAmount">Enter Amount:</label>
+            <input type="number" id="creditAmount" placeholder="Enter amount">
+        </div>
+        <button onclick="creditAmount()">Submit</button>
+        <div class="messages hidden" id="creditMessage"></div>
+        <button onclick="redirectHome()">Back to Home</button>
+    </div>
+
+    <script>
+        let balance = 5000; // Initial balance
+        let targetPage = ""; // Page user is trying to access
+        let isAuthenticated = false; // Tracks if the user is logged in
+        const correctPassword = "password"; // Hardcoded password for demonstration
+
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username === "1234567890" && password === correctPassword) {
+                isAuthenticated = true;
+                showPage("homePage");
+            } else {
+                alert("Invalid credentials!");
+            }
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            showPage("loginPage");
+        }
+
+        function authenticate(page) {
+            if (!isAuthenticated) {
+                alert("You must log in first!");
+                showPage("loginPage");
+                return;
+            }
+            targetPage = page;
+            showPage("passwordPrompt");
+        }
+
+        function verifyPassword() {
+            const inputPassword = document.getElementById("sectionPassword").value;
+            const messageDiv = document.getElementById("passwordMessage");
+
+            if (inputPassword === correctPassword) {
+                messageDiv.classList.add("hidden");
+                showPage(targetPage);
+            } else {
+                messageDiv.innerText = "Incorrect password!";
+                messageDiv.classList.remove("hidden");
+            }
+        }
+
+        function redirectHome() {
+            showPage("homePage");
+        }
+
+        function showPage(pageId) {
+            if (!isAuthenticated && pageId !== "loginPage") {
+                alert("Session expired! Redirecting to login.");
+                pageId = "loginPage";
+            }
+            document.querySelectorAll(".container").forEach((container) => {
+                container.classList.add("hidden");
+            });
+            document.getElementById(pageId).classList.remove("hidden");
+        }
+
+        function debitAmount() {
+            const amount = parseFloat(document.getElementById("debitAmount").value);
+            const messageDiv = document.getElementById("debitMessage");
+
+            if (amount > 0 && amount <= balance) {
+                balance -= amount;
+                document.getElementById("balance").innerText = balance;
+                messageDiv.innerText = `₹${amount} debited successfully. New balance: ₹${balance}`;
+                messageDiv.classList.remove("hidden");
+            } else {
+                messageDiv.innerText = "Invalid amount or insufficient balance!";
+                messageDiv.classList.remove("hidden");
+            }
+        }
+
+        function creditAmount() {
+            const amount = parseFloat(document.getElementById("creditAmount").value);
+            const messageDiv = document.getElementById("creditMessage");
+
+            if (amount > 0) {
+                balance += amount;
+                document.getElementById("balance").innerText = balance;
+                messageDiv.innerText = `₹${amount} credited successfully. New balance: ₹${balance}`;
+                messageDiv.classList.remove("hidden");
+            } else {
+                messageDiv.innerText = "Invalid amount!";
+                messageDiv.classList.remove("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
